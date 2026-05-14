@@ -5,6 +5,10 @@
   "workspaces": [
     "apps/*"
   ],
+  "scripts": {
+    "product": "npm run dev -w @projeto/product-service",
+    "order": "npm run dev -w @projeto/order-service"
+  },
   "devDependencies": {
     "typescript": "^6.0.3"
   }
