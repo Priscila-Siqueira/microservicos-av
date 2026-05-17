@@ -34,7 +34,7 @@ app.get('/products/:id', async (request, reply) => {
 });
 
 // Iniciando o servidor
-app.listen({port: 30001, host: '0.0.0.0'}, (err, address) => {
+app.listen({port: 3001, host: '0.0.0.0'}, (err, address) => {
     if (err) {
         console.error(err);
         process.exit(1);
