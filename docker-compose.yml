@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  product-service:
+    build:
+      context: ./apps/product-service
+    ports:
+      - "3001:3001"
+    networks:
+      - microservices-net
+
+  order-service:
+    build:
+      context: ./apps/order-service
+    environment:
+      - PRODUCT_SERVICE_URL=http://product-service:3001
+    ports:
+      - "3002:3002"
+    networks:
+      - microservices-net
+
+  api-gateway:
+    build:
+      context: ./apps/api-gateway
+    environment:
+      - PRODUCT_SERVICE_URL=http://product-service:3001
+      - ORDER_SERVICE_URL=http://order-service:3002
+    ports:
+      - "3000:3000"
+    networks:
+      - microservices-net
+    depends_on:
+      - product-service
+      - order-service
+
+networks:
+  microservices-net:
+    driver: bridge

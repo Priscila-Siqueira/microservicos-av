@@ -4,8 +4,8 @@ import httpProxy from '@fastify/http-proxy';
 const app = Fastify( {logger: true} );
 
 //Lendo as URLs do ambiente
-const PRODUCTS_SERVICE = process.env.PRODUCTS_SERVICE_URL || 'http://localhost:3001';
-const ORDERS_SERVICE = process.env.ORDERS_SERVICE_URL || 'http://localhost:3002';
+const PRODUCTS_SERVICE = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3001';
+const ORDERS_SERVICE = process.env.ORDER_SERVICE_URL || 'http://localhost:3002';
 
 //Rota para o serviço de produtos
 app.register(httpProxy, {
