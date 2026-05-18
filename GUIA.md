@@ -450,13 +450,352 @@ Resultado esperado:
 
 ---
 
+# 5. Implementação do API Gateway
+
+## Nome da branch
+
+```text
+step/05-api-gateway
+```
+
+## Explicação
+
+Nesta branch foi implementado o `API Gateway` da aplicação.
+
+O API Gateway funciona como um ponto central de entrada para os microsserviços.
+
+Agora, o cliente não precisa mais acessar diretamente o `Product Service` ou o `Order Service`.
+
+Todas as requisições passam primeiro pelo Gateway, que redireciona as chamadas para os serviços corretos.
+
+Essa abordagem facilita:
+
+- Centralização das rotas
+- Organização da arquitetura
+- Controle de acesso
+- Escalabilidade
+- Manutenção futura da aplicação
+
+## O que foi feito
+
+- Criação do `api-gateway`
+- Configuração do Fastify
+- Configuração do `@fastify/http-proxy`
+- Proxy para o Product Service
+- Proxy para o Order Service
+- Criação da rota de Health Check
+- Centralização das requisições da aplicação
+- Execução do Gateway na porta `3000`
+
+## Estrutura criada
+
+```text
+apps
+├── api-gateway
+├── product-service
+└── order-service
+```
+
+## Rotas disponíveis
+
+### Produtos
+
+```http
+GET /products
+GET /products/:id
+```
+
+### Pedidos
+
+```http
+GET /orders
+POST /orders
+```
+
+### Health Check
+
+```http
+GET /health
+```
+
+## Fluxo implementado
+
+```text
+Cliente
+   │
+   ▼
+API Gateway
+   │
+   ├──► Product Service
+   │
+   └──► Order Service
+```
+
+## Como executar os serviços
+
+Agora os três serviços precisam estar rodando ao mesmo tempo.
+
+### Terminal 1 — subir Product Service
+
+```bash
+npm run product
+```
+
+Resultado esperado:
+
+```text
+Servidor rodando em http://0.0.0.0:30001
+```
+
+### Terminal 2 — subir Order Service
+
+```bash
+npm run order
+```
+
+Resultado esperado:
+
+```text
+Order Service rodando em http://0.0.0.0:3002
+```
+
+### Terminal 3 — subir API Gateway
+
+```bash
+npm run gateway
+```
+
+Resultado esperado:
+
+```text
+API Gateway rodando em http://0.0.0.0:3000
+```
+
+## Comandos para mostrar funcionando
+
+### Testar Health Check
+
+```bash
+curl http://localhost:3000/health
+```
+
+Resultado esperado:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+### Listar produtos pelo Gateway
+
+```bash
+curl http://localhost:3000/products
+```
+
+### Buscar produto pelo Gateway
+
+```bash
+curl http://localhost:3000/products/1
+```
+
+### Criar pedido pelo Gateway
+
+No PowerShell:
+
+```powershell
+curl.exe -X POST http://localhost:3000/orders `
+  -H "Content-Type: application/json" `
+  --data '{\"productId\":1,\"quantity\":2}'
+```
+
+Resultado esperado:
+
+```json
+{
+  "id": 1,
+  "productId": 1,
+  "productName": "Notebook Pro",
+  "quantity": 2,
+  "total": 7000,
+  "createdAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+### Listar pedidos pelo Gateway
+
+```bash
+curl http://localhost:3000/orders
+```
+
+Resultado esperado:
+
+```json
+[
+  {
+    "id": 1,
+    "productId": 1,
+    "productName": "Notebook Pro",
+    "quantity": 2,
+    "total": 7000,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+]
+```
+
+---
+
+# 6. Dockerização da aplicação
+
+## Nome da branch
+
+```text
+step/06-docker
+```
+
+## Explicação
+
+Nesta branch foi realizada a dockerização completa da aplicação.
+
+Cada microsserviço passou a possuir seu próprio container Docker.
+
+Além disso, foi criado um arquivo `docker-compose.yml` para permitir subir toda a arquitetura com apenas um comando.
+
+Com Docker, a aplicação passa a ter:
+
+- Ambiente padronizado
+- Facilidade de execução
+- Maior portabilidade
+- Facilidade de deploy
+- Isolamento entre serviços
+
+## O que foi feito
+
+- Criação dos arquivos `Dockerfile`
+- Criação do `docker-compose.yml`
+- Configuração dos containers
+- Configuração das portas dos serviços
+- Configuração da rede entre containers
+- Execução conjunta de todos os microsserviços
+
+## Estrutura adicionada
+
+```text
+microservicos-av
+│
+├── apps
+│   ├── api-gateway
+│   ├── order-service
+│   └── product-service
+│
+├── docker-compose.yml
+```
+
+## Containers da aplicação
+
+| Serviço | Porta |
+|---|---|
+| API Gateway | 3000 |
+| Product Service | 30001 |
+| Order Service | 3002 |
+
+## Como executar com Docker
+
+### Build e inicialização dos containers
+
+```bash
+docker-compose up --build
+```
+
+## Resultado esperado
+
+Todos os serviços devem iniciar corretamente.
+
+Exemplo:
+
+```text
+API Gateway rodando em http://0.0.0.0:3000
+Product Service rodando em http://0.0.0.0:30001
+Order Service rodando em http://0.0.0.0:3002
+```
+
+## Comandos para testar a aplicação
+
+### Health Check
+
+```bash
+curl http://localhost:3000/health
+```
+
+Resultado esperado:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+### Listar produtos
+
+```bash
+curl http://localhost:3000/products
+```
+
+### Criar pedido
+
+No PowerShell:
+
+```powershell
+curl.exe -X POST http://localhost:3000/orders `
+  -H "Content-Type: application/json" `
+  --data '{\"productId\":1,\"quantity\":2}'
+```
+
+Resultado esperado:
+
+```json
+{
+  "id": 1,
+  "productId": 1,
+  "productName": "Notebook Pro",
+  "quantity": 2,
+  "total": 7000,
+  "createdAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+### Listar pedidos
+
+```bash
+curl http://localhost:3000/orders
+```
+
+Resultado esperado:
+
+```json
+[
+  {
+    "id": 1,
+    "productId": 1,
+    "productName": "Notebook Pro",
+    "quantity": 2,
+    "total": 7000,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+]
+```
+
+---
+
 # Observações gerais
 
 - Cada branch representa uma evolução do projeto.
 - Cada microserviço possui sua própria responsabilidade.
 - O Product Service roda na porta `30001`.
 - O Order Service roda na porta `3002`.
+- O API Gateway roda na porta `3000`.
 - Até a branch `step/03-order-service`, os serviços eram independentes.
 - A partir da branch `step/04-http-communication`, o Order Service passou a consultar o Product Service.
-- O API Gateway ainda não foi implementado.
-- A próxima etapa será a branch `step/05-api-gateway`.
+- A partir da branch `step/05-api-gateway`, todas as requisições passaram a ser centralizadas pelo Gateway.
+- Na branch `step/06-docker`, toda a aplicação passou a rodar em containers Docker.
+- O projeto evoluiu gradualmente até chegar em uma arquitetura completa baseada em microsserviços.
